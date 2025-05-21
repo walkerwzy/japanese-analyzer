@@ -92,9 +92,10 @@ body {
 }
 
 #analyzedSentenceOutput {
-  line-height: 3.0; 
-  padding-top: 0.6em; 
-  word-spacing: 0.2em; 
+  line-height: 3.6; /* 增加行高，提供更多空间给假名 */
+  padding-top: 0.8em; /* 增加顶部填充 */
+  padding-bottom: 0.6em; /* 增加底部填充 */
+  word-spacing: 0.3em; /* 增加词间距 */
 }
 
 .word-unit-wrapper { 
@@ -104,19 +105,22 @@ body {
   margin: 0 2px; 
   padding: 0;
   vertical-align: baseline; 
-  position: relative; 
+  position: relative;
+  min-width: 1.2em; /* 确保有最小宽度 */
 }
 
 .word-token { 
   position: relative; 
   display: inline-block; 
-  padding: 0 2px; 
+  padding: 0 3px; /* 增加水平内边距 */
   padding-bottom: 2px; 
+  padding-top: 1.8em; /* 为假名提供足够空间 */
   font-size: 1.2rem; 
   color: #2c3e50; 
   cursor: pointer;
   transition: color 0.2s ease;
-  line-height: 1; 
+  line-height: 1.2; /* 略微增加行高 */
+  margin: 0 1px; /* 添加词间距 */
 }
 
 .word-token::after { 
@@ -384,22 +388,33 @@ rb {
   position: relative;
   display: inline-block;
   text-align: center;
+  min-width: 1em;
+  padding: 0 0.1em;
 }
 
 .ruby-base {
   font-size: 1em;
   line-height: 1.2;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .ruby-text {
   position: absolute;
-  top: -1.2em;
-  left: 0;
-  right: 0;
+  top: -1.4em; /* 增加一点距离 */
+  left: 50%;
+  transform: translateX(-50%); /* 居中对齐 */
+  width: max-content; /* 允许比基本文字更宽 */
   font-size: 0.6em;
   color: #555;
   user-select: none;
   line-height: 1.1;
   text-align: center;
+  background-color: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+  padding: 0 2px;
+  border-radius: 2px;
+  max-width: 200%; /* 限制最大宽度 */
+  white-space: nowrap;
+  z-index: 2;
 }
