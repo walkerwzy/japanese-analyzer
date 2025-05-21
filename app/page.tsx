@@ -57,11 +57,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start pt-8 sm:pt-12 lg:pt-16 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-start pt-4 sm:pt-8 lg:pt-16 p-3 sm:p-4">
       <div className="w-full max-w-3xl">
-        <header className="text-center mb-8 mt-16">
-          <h1 className="text-4xl font-bold text-gray-800">日本語<span className="text-[#007AFF]">文章</span>解析器</h1>
-          <p className="text-lg text-gray-600 mt-2">AI驱动・深入理解日语句子结构与词义</p>
+        <header className="text-center mb-6 sm:mb-8 mt-12 sm:mt-16">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">日本語<span className="text-[#007AFF]">文章</span>解析器</h1>
+          <p className="text-base sm:text-lg text-gray-600 mt-2">AI驱动・深入理解日语句子结构与词义</p>
         </header>
 
         <main>
@@ -82,7 +82,7 @@ export default function Home() {
 
           {analysisError && (
             <div className="premium-card">
-              <div className="bg-red-50 border-l-4 border-red-500 p-4">
+              <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <i className="fas fa-exclamation-circle text-red-500"></i>
@@ -115,8 +115,8 @@ export default function Home() {
           )}
         </main>
 
-        <footer className="text-center mt-12 py-6 border-t border-gray-200">
-          <p className="text-gray-500 text-sm">&copy; 2025 高级日语解析工具. All rights reserved.</p>
+        <footer className="text-center mt-8 sm:mt-12 py-4 sm:py-6 border-t border-gray-200">
+          <p className="text-gray-500 text-xs sm:text-sm">&copy; 2025 高级日语解析工具. All rights reserved.</p>
           <p className="text-gray-400 text-xs mt-1">Powered by Gemini AI</p>
         </footer>
       </div>

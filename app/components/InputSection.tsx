@@ -73,7 +73,7 @@ export default function InputSection({
 
   return (
     <div className="premium-card">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4">输入日语句子</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-3 sm:mb-4">输入日语句子</h2>
       <textarea 
         id="japaneseInput" 
         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-[#007AFF] transition duration-150 ease-in-out resize-none" 
@@ -81,9 +81,10 @@ export default function InputSection({
         placeholder="例：今日はいい天気ですね。或上传图片识别文字。"
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
+        style={{ fontSize: '16px' }} // 防止移动设备缩放
       ></textarea>
       
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
         <input 
           type="file" 
           id="imageUploadInput" 
@@ -93,24 +94,24 @@ export default function InputSection({
         />
         <button 
           id="uploadImageButton" 
-          className="premium-button premium-button-secondary w-full sm:w-auto mb-3 sm:mb-0 sm:order-1"
+          className="premium-button premium-button-secondary w-full sm:w-auto mb-2 sm:mb-0 sm:order-1 text-sm sm:text-base py-2 sm:py-3"
           onClick={() => document.getElementById('imageUploadInput')?.click()}
           disabled={isImageUploading}
         >
           <i className="fas fa-camera mr-2"></i>
           {!isImageUploading && <span className="button-text">上传图片提取文字</span>}
-          <div className="loading-spinner" style={{ display: isImageUploading ? 'inline-block' : 'none' }}></div>
+          <div className="loading-spinner" style={{ display: isImageUploading ? 'inline-block' : 'none', width: '18px', height: '18px' }}></div>
           {isImageUploading && <span className="button-text">提取中...</span>}
         </button>
         
         <button 
           id="analyzeButton" 
-          className="premium-button premium-button-primary w-full sm:w-auto sm:order-2"
+          className="premium-button premium-button-primary w-full sm:w-auto sm:order-2 text-sm sm:text-base py-2 sm:py-3"
           onClick={handleAnalyze}
           disabled={isLoading}
         >
           {!isLoading && <span className="button-text">解析句子</span>}
-          <div className="loading-spinner" style={{ display: isLoading ? 'inline-block' : 'none' }}></div>
+          <div className="loading-spinner" style={{ display: isLoading ? 'inline-block' : 'none', width: '18px', height: '18px' }}></div>
           {isLoading && <span className="button-text">解析中...</span>}
         </button>
       </div>

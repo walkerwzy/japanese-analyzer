@@ -13,29 +13,6 @@ AI驱动的日语文章解析工具，帮助中文用户深入理解日语句子
 
 ## 部署说明
 
-### 本地开发
-
-1. 克隆仓库
-```bash
-git clone https://github.com/cokice/japanese-analyzer.git
-cd japanese-analyzer
-```
-
-2. 安装依赖
-```bash
-npm install
-```
-
-3. 创建 `.env.local` 文件并添加API密钥
-```
-API_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
-API_KEY=your_gemini_api_key_here
-```
-
-4. 启动开发服务器
-```bash
-npm run dev
-```
 
 ### Vercel部署
 
