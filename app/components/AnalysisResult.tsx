@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { containsKanji, getPosClass, posChineseMap, speakJapanese } from '../utils/helpers';
 
 interface TokenData {
@@ -196,7 +196,7 @@ export default function AnalysisResult({
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [activeWordToken, wordDetail]);
+  }, [activeWordToken, wordDetail, handleCloseWordDetail]);
 
   if (!tokens || tokens.length === 0) {
     return null;
