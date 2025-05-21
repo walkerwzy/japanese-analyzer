@@ -5,10 +5,14 @@ import { extractTextFromImage } from '../services/api';
 
 interface InputSectionProps {
   onAnalyze: (text: string) => void;
+  userApiKey?: string;
+  userApiUrl?: string;
 }
 
 export default function InputSection({ 
-  onAnalyze
+  onAnalyze,
+  userApiKey,
+  userApiUrl
 }: InputSectionProps) {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,8 +53,8 @@ export default function InputSection({
       try {
         const imageExtractionPrompt = "请仅提取并返回这张图片中的所有日文文字。不要添加任何其他评论、解释或格式化。如果文字是多行或者分散的，请将它们合并成一个单一的文本字符串，用换行符（\\n）分隔不同的文本块（如果适用）。";
         
-        // 使用服务端API
-        const extractedText = await extractTextFromImage(imageData, imageExtractionPrompt);
+        // 使用服务端API，传递用户API设置
+        const extractedText = await extractTextFromImage(imageData, imageExtractionPrompt, userApiKey, userApiUrl);
         setInputText(extractedText); 
         setUploadStatus('文字提取成功！请确认后点击"解析句子"。');
         setUploadStatusClass('mt-2 text-sm text-green-600');

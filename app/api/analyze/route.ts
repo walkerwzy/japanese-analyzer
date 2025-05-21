@@ -10,15 +10,25 @@ export async function POST(req: NextRequest) {
     // 解析请求体
     const requestData = await req.json();
     
-    if (!API_KEY) {
+    // 从请求头中获取用户提供的API密钥（如果有）
+    const authHeader = req.headers.get('Authorization');
+    const userApiKey = authHeader ? authHeader.replace('Bearer ', '') : '';
+    
+    // 优先使用用户API密钥，如果没有则使用环境变量中的密钥
+    const effectiveApiKey = userApiKey || API_KEY;
+    
+    if (!effectiveApiKey) {
       return NextResponse.json(
-        { error: { message: '服务器未配置API密钥' } },
+        { error: { message: '未提供API密钥，请在设置中配置API密钥或联系管理员配置服务器密钥' } },
         { status: 500 }
       );
     }
 
     // 从请求中提取数据
-    const { prompt, model = MODEL_NAME } = requestData;
+    const { prompt, model = MODEL_NAME, apiUrl } = requestData;
+    
+    // 优先使用用户提供的API URL，否则使用环境变量中的URL
+    const effectiveApiUrl = apiUrl || API_URL;
     
     if (!prompt) {
       return NextResponse.json(
@@ -35,11 +45,11 @@ export async function POST(req: NextRequest) {
     };
 
     // 发送到实际的AI API
-    const response = await fetch(API_URL, {
+    const response = await fetch(effectiveApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        'Authorization': `Bearer ${effectiveApiKey}`
       },
       body: JSON.stringify(payload)
     });

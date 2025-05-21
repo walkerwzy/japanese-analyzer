@@ -5,10 +5,14 @@ import { translateText } from '../services/api';
 
 interface TranslationSectionProps {
   japaneseText: string;
+  userApiKey?: string;
+  userApiUrl?: string;
 }
 
 export default function TranslationSection({ 
-  japaneseText
+  japaneseText,
+  userApiKey,
+  userApiUrl
 }: TranslationSectionProps) {
   const [translation, setTranslation] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +28,8 @@ export default function TranslationSection({
     setIsVisible(true); // 确保显示翻译区域
 
     try {
-      // 使用服务端API进行翻译
-      const translatedText = await translateText(japaneseText);
+      // 使用服务端API进行翻译，传递用户API设置
+      const translatedText = await translateText(japaneseText, userApiKey, userApiUrl);
       setTranslation(translatedText);
     } catch (error) {
       console.error('Error during full sentence translation:', error);

@@ -14,11 +14,15 @@ interface TokenData {
 interface AnalysisResultProps {
   tokens: TokenData[];
   originalSentence: string;
+  userApiKey?: string;
+  userApiUrl?: string;
 }
 
 export default function AnalysisResult({ 
   tokens, 
-  originalSentence
+  originalSentence,
+  userApiKey,
+  userApiUrl
 }: AnalysisResultProps) {
   const [activeWordToken, setActiveWordToken] = useState<HTMLElement | null>(null);
   const [wordDetail, setWordDetail] = useState<WordDetail | null>(null);
@@ -50,8 +54,8 @@ export default function AnalysisResult({
     setIsLoading(true);
 
     try {
-      // 使用服务端API获取词汇详情
-      const details = await getWordDetails(word, pos, sentence, furigana, romaji);
+      // 使用服务端API获取词汇详情，传递用户API设置
+      const details = await getWordDetails(word, pos, sentence, furigana, romaji, userApiKey, userApiUrl);
       setWordDetail(details);
     } catch (error) {
       console.error('Error fetching word details:', error);

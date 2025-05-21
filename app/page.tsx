@@ -1,16 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import InputSection from './components/InputSection';
 import AnalysisResult from './components/AnalysisResult';
 import TranslationSection from './components/TranslationSection';
-import { analyzeSentence, TokenData } from './services/api';
+import SettingsModal from './components/SettingsModal';
+import { analyzeSentence, TokenData, DEFAULT_API_URL } from './services/api';
 
 export default function Home() {
   const [currentSentence, setCurrentSentence] = useState('');
   const [analyzedTokens, setAnalyzedTokens] = useState<TokenData[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState('');
+  
+  // API设置相关状态
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [userApiKey, setUserApiKey] = useState('');
+  const [userApiUrl, setUserApiUrl] = useState(DEFAULT_API_URL);
+
+  // 从本地存储加载用户API设置
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('userApiKey') || '';
+    const storedApiUrl = localStorage.getItem('userApiUrl') || DEFAULT_API_URL;
+    
+    setUserApiKey(storedApiKey);
+    setUserApiUrl(storedApiUrl);
+  }, []);
+  
+  // 保存用户API设置
+  const handleSaveSettings = (apiKey: string, apiUrl: string) => {
+    localStorage.setItem('userApiKey', apiKey);
+    localStorage.setItem('userApiUrl', apiUrl);
+    
+    setUserApiKey(apiKey);
+    setUserApiUrl(apiUrl);
+  };
 
   const handleAnalyze = async (text: string) => {
     if (!text) return;
@@ -20,7 +44,8 @@ export default function Home() {
     setCurrentSentence(text);
     
     try {
-      const tokens = await analyzeSentence(text);
+      // 传递用户API设置
+      const tokens = await analyzeSentence(text, userApiKey, userApiUrl);
       setAnalyzedTokens(tokens);
     } catch (error) {
       console.error('Analysis error:', error);
@@ -42,6 +67,8 @@ export default function Home() {
         <main>
           <InputSection 
             onAnalyze={handleAnalyze}
+            userApiKey={userApiKey}
+            userApiUrl={userApiUrl}
           />
 
           {isAnalyzing && (
@@ -74,12 +101,16 @@ export default function Home() {
             <AnalysisResult 
               tokens={analyzedTokens}
               originalSentence={currentSentence}
+              userApiKey={userApiKey}
+              userApiUrl={userApiUrl}
             />
           )}
 
           {!isAnalyzing && currentSentence && (
             <TranslationSection 
               japaneseText={currentSentence}
+              userApiKey={userApiKey}
+              userApiUrl={userApiUrl}
             />
           )}
         </main>
@@ -89,6 +120,16 @@ export default function Home() {
           <p className="text-gray-400 text-xs mt-1">Powered by Gemini AI</p>
         </footer>
       </div>
+      
+      {/* 设置模态框 */}
+      <SettingsModal
+        userApiKey={userApiKey}
+        userApiUrl={userApiUrl}
+        defaultApiUrl={DEFAULT_API_URL}
+        onSaveSettings={handleSaveSettings}
+        isModalOpen={isSettingsModalOpen}
+        onModalClose={() => setIsSettingsModalOpen(!isSettingsModalOpen)}
+      />
     </div>
   );
 }

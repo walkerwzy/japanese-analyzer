@@ -21,20 +21,48 @@ export interface WordDetail {
 export const DEFAULT_API_URL = "/api";
 export const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
 
+// 获取API请求URL
+function getApiEndpoint(endpoint: string, userApiUrl?: string): string {
+  // 如果用户提供了自定义API URL，则使用它，否则使用默认API URL
+  const baseUrl = userApiUrl && userApiUrl !== DEFAULT_API_URL ? userApiUrl : DEFAULT_API_URL;
+  return `${baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+}
+
+// 构建请求头
+function getHeaders(userApiKey?: string): HeadersInit {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  
+  // 如果用户提供了自定义API密钥，则添加到请求头
+  if (userApiKey) {
+    headers['Authorization'] = `Bearer ${userApiKey}`;
+  }
+  
+  return headers;
+}
+
 // 分析日语句子
 export async function analyzeSentence(
-  sentence: string
+  sentence: string,
+  userApiKey?: string,
+  userApiUrl?: string
 ): Promise<TokenData[]> {
   if (!sentence) {
     throw new Error('缺少句子');
   }
 
   try {
-    const response = await fetch(`${DEFAULT_API_URL}/analyze`, {
+    const apiUrl = getApiEndpoint('/analyze', userApiUrl);
+    const headers = getHeaders(userApiKey);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: `请对以下日语句子进行详细的词法分析，并以JSON数组格式返回结果。每个对象应包含以下字段："word", "pos", "furigana", "romaji"。确保输出是严格的JSON格式，不包含任何markdown或其他非JSON字符。
-待解析句子： "${sentence}"` })
+      headers,
+      body: JSON.stringify({ 
+        prompt: `请对以下日语句子进行详细的词法分析，并以JSON数组格式返回结果。每个对象应包含以下字段："word", "pos", "furigana", "romaji"。确保输出是严格的JSON格式，不包含任何markdown或其他非JSON字符。
+待解析句子： "${sentence}"`,
+        model: MODEL_NAME,
+        apiUrl: userApiUrl !== DEFAULT_API_URL ? userApiUrl : undefined
+      })
     });
 
     if (!response.ok) {
@@ -73,13 +101,26 @@ export async function getWordDetails(
   pos: string, 
   sentence: string, 
   furigana?: string, 
-  romaji?: string
+  romaji?: string,
+  userApiKey?: string,
+  userApiUrl?: string
 ): Promise<WordDetail> {
   try {
-    const response = await fetch(`${DEFAULT_API_URL}/word-detail`, {
+    const apiUrl = getApiEndpoint('/word-detail', userApiUrl);
+    const headers = getHeaders(userApiKey);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ word, pos, sentence, furigana, romaji })
+      headers,
+      body: JSON.stringify({ 
+        word, 
+        pos, 
+        sentence, 
+        furigana, 
+        romaji,
+        model: MODEL_NAME,
+        apiUrl: userApiUrl !== DEFAULT_API_URL ? userApiUrl : undefined
+      })
     });
 
     if (!response.ok) {
@@ -113,12 +154,23 @@ export async function getWordDetails(
 }
 
 // 翻译文本
-export async function translateText(japaneseText: string): Promise<string> {
+export async function translateText(
+  japaneseText: string,
+  userApiKey?: string,
+  userApiUrl?: string
+): Promise<string> {
   try {
-    const response = await fetch(`${DEFAULT_API_URL}/translate`, {
+    const apiUrl = getApiEndpoint('/translate', userApiUrl);
+    const headers = getHeaders(userApiKey);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: japaneseText })
+      headers,
+      body: JSON.stringify({ 
+        text: japaneseText,
+        model: MODEL_NAME,
+        apiUrl: userApiUrl !== DEFAULT_API_URL ? userApiUrl : undefined
+      })
     });
 
     if (!response.ok) {
@@ -142,12 +194,25 @@ export async function translateText(japaneseText: string): Promise<string> {
 }
 
 // 从图片提取文本
-export async function extractTextFromImage(imageData: string, prompt?: string): Promise<string> {
+export async function extractTextFromImage(
+  imageData: string, 
+  prompt?: string,
+  userApiKey?: string,
+  userApiUrl?: string
+): Promise<string> {
   try {
-    const response = await fetch(`${DEFAULT_API_URL}/image-to-text`, {
+    const apiUrl = getApiEndpoint('/image-to-text', userApiUrl);
+    const headers = getHeaders(userApiKey);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageData, prompt })
+      headers,
+      body: JSON.stringify({ 
+        imageData, 
+        prompt,
+        model: MODEL_NAME,
+        apiUrl: userApiUrl !== DEFAULT_API_URL ? userApiUrl : undefined
+      })
     });
 
     if (!response.ok) {

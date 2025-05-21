@@ -8,11 +8,21 @@ const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
 export async function POST(req: NextRequest) {
   try {
     // 解析请求体
-    const { text } = await req.json();
+    const { text, model = MODEL_NAME, apiUrl } = await req.json();
     
-    if (!API_KEY) {
+    // 从请求头中获取用户提供的API密钥（如果有）
+    const authHeader = req.headers.get('Authorization');
+    const userApiKey = authHeader ? authHeader.replace('Bearer ', '') : '';
+    
+    // 优先使用用户API密钥，如果没有则使用环境变量中的密钥
+    const effectiveApiKey = userApiKey || API_KEY;
+    
+    // 优先使用用户提供的API URL，否则使用环境变量中的URL
+    const effectiveApiUrl = apiUrl || API_URL;
+    
+    if (!effectiveApiKey) {
       return NextResponse.json(
-        { error: { message: '服务器未配置API密钥' } },
+        { error: { message: '未提供API密钥，请在设置中配置API密钥或联系管理员配置服务器密钥' } },
         { status: 500 }
       );
     }
@@ -27,17 +37,17 @@ export async function POST(req: NextRequest) {
     // 构建翻译请求
     const translationPrompt = `请将以下日语句子翻译成简体中文：\n\n"${text}"\n\n请仅返回翻译后的中文文本。`;
     const payload = {
-      model: MODEL_NAME,
+      model: model,
       reasoning_effort: "none",
       messages: [{ role: "user", content: translationPrompt }]
     };
 
     // 发送到实际的AI API
-    const response = await fetch(API_URL, {
+    const response = await fetch(effectiveApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        'Authorization': `Bearer ${effectiveApiKey}`
       },
       body: JSON.stringify(payload)
     });
