@@ -212,12 +212,12 @@ export default function AnalysisResult({
               className={`word-token ${getPosClass(token.pos)}`}
               onClick={(e) => handleWordClick(e, token)}
             >
-              <ruby>
-                <rb>{token.word}</rb>
+              <span className="ruby-container">
+                <span className="ruby-base">{token.word}</span>
                 {token.furigana && token.furigana !== token.word && containsKanji(token.word) && token.pos !== '記号' && (
-                  <rt>{token.furigana}</rt>
+                  <span className="ruby-text">{token.furigana}</span>
                 )}
-              </ruby>
+              </span>
             </span>
             
             {token.romaji && token.pos !== '記号' && (
