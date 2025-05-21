@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { containsKanji, getPosClass, posChineseMap, speakJapanese } from '../utils/helpers';
 
 interface TokenData {
@@ -170,13 +170,13 @@ export default function AnalysisResult({
     }
   };
 
-  const handleCloseWordDetail = () => {
+  const handleCloseWordDetail = useCallback(() => {
     if (activeWordToken) {
       activeWordToken.classList.remove('active-word');
       setActiveWordToken(null);
     }
     setWordDetail(null);
-  };
+  }, [activeWordToken]);
 
   // 点击外部关闭详情
   useEffect(() => {
