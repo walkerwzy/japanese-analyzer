@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import InputSection from './components/InputSection';
 import AnalysisResult from './components/AnalysisResult';
 import TranslationSection from './components/TranslationSection';
