@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { containsKanji, getPosClass, posChineseMap, speakJapanese } from '../utils/helpers';
+import { getWordDetails, WordDetail } from '../services/api';
 
 interface TokenData {
   word: string;
@@ -10,30 +11,14 @@ interface TokenData {
   romaji?: string;
 }
 
-interface WordDetail {
-  originalWord: string;
-  chineseTranslation: string;
-  pos: string;
-  furigana?: string;
-  romaji?: string;
-  dictionaryForm?: string;
-  explanation: string;
-}
-
 interface AnalysisResultProps {
   tokens: TokenData[];
   originalSentence: string;
-  apiKey: string;
-  apiUrl: string;
-  onShowSettingsModal: () => void;
 }
 
 export default function AnalysisResult({ 
   tokens, 
-  originalSentence,
-  apiKey,
-  apiUrl,
-  onShowSettingsModal
+  originalSentence
 }: AnalysisResultProps) {
   const [activeWordToken, setActiveWordToken] = useState<HTMLElement | null>(null);
   const [wordDetail, setWordDetail] = useState<WordDetail | null>(null);
@@ -62,98 +47,12 @@ export default function AnalysisResult({
   };
 
   const fetchWordDetails = async (word: string, pos: string, sentence: string, furigana?: string, romaji?: string) => {
-    if (!apiKey) {
-      onShowSettingsModal();
-      return;
-    }
-
     setIsLoading(true);
 
-    let contextWordInfo = `单词 "${word}" (词性: ${pos}`;
-    if (furigana && furigana !== word && containsKanji(word)) contextWordInfo += `, 读音: ${furigana}`;
-    if (romaji) contextWordInfo += `, 罗马音: ${romaji}`;
-    contextWordInfo += `)`;
-
-    const wordDetailPrompt = `在日语句子 "${sentence}" 的上下文中，${contextWordInfo} 的具体含义是什么？请提供以下信息，并以严格的JSON对象格式返回，不要包含任何markdown或其他非JSON字符：
-{
-  "originalWord": "${word}",
-  "chineseTranslation": "中文翻译",
-  "pos": "${pos}",
-  "furigana": "${(furigana && furigana !== word && containsKanji(word)) ? furigana : ''}",
-  "romaji": "${romaji || ''}",
-  "dictionaryForm": "辞书形（如果适用）",
-  "explanation": "中文解释（包括外来语来源和活用形原因）"
-}`;
-
-    const payload = {
-      model: "gemini-2.5-flash-preview-05-20",
-      reasoning_effort: "none",
-      messages: [{ role: "user", content: wordDetailPrompt }],
-    };
-
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      let details: WordDetail;
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Error (Word Detail):', errorData);
-        details = { 
-          originalWord: word, 
-          pos: pos, 
-          furigana: (furigana && furigana !== word && containsKanji(word)) ? furigana : '', 
-          romaji: romaji || '', 
-          dictionaryForm: '', 
-          chineseTranslation: '错误', 
-          explanation: `查询释义失败：${errorData.error?.message || response.statusText || '未知错误'}` 
-        };
-      } else {
-        const result = await response.json();
-        if (result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
-          let responseContent = result.choices[0].message.content;
-          try {
-            const jsonMatch = responseContent.match(/```json\n([\s\S]*?)\n```/);
-            if (jsonMatch && jsonMatch[1]) {
-              responseContent = jsonMatch[1];
-            }
-            details = JSON.parse(responseContent);
-            if (!details.furigana && furigana && furigana !== word && containsKanji(word)) details.furigana = furigana;
-            if (!details.romaji && romaji) details.romaji = romaji;
-          } catch (e) {
-            console.error("Failed to parse JSON from word detail response:", e, responseContent);
-            details = { 
-              originalWord: word, 
-              pos: pos, 
-              furigana: (furigana && furigana !== word && containsKanji(word)) ? furigana : '', 
-              romaji: romaji || '', 
-              dictionaryForm: '', 
-              chineseTranslation: '错误', 
-              explanation: `释义结果JSON格式错误。原始回复: ${responseContent}`
-            };
-          }
-        } else {
-          console.error('Unexpected API response structure for word detail:', result);
-          details = { 
-            originalWord: word, 
-            pos: pos, 
-            furigana: (furigana && furigana !== word && containsKanji(word)) ? furigana : '', 
-            romaji: romaji || '', 
-            dictionaryForm: '', 
-            chineseTranslation: '错误', 
-            explanation: '释义结果格式错误。'
-          };
-        }
-      }
+      // 使用服务端API获取词汇详情
+      const details = await getWordDetails(word, pos, sentence, furigana, romaji);
       setWordDetail(details);
-
     } catch (error) {
       console.error('Error fetching word details:', error);
       setWordDetail({ 

@@ -1,19 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { translateText } from '../services/api';
 
 interface TranslationSectionProps {
   japaneseText: string;
-  apiKey: string;
-  apiUrl: string;
-  onShowSettingsModal: () => void;
 }
 
 export default function TranslationSection({ 
-  japaneseText, 
-  apiKey, 
-  apiUrl,
-  onShowSettingsModal
+  japaneseText
 }: TranslationSectionProps) {
   const [translation, setTranslation] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,45 +20,13 @@ export default function TranslationSection({
       return;
     }
 
-    if (!apiKey) {
-      onShowSettingsModal();
-      return;
-    }
-
     setIsLoading(true);
     setIsVisible(true); // 确保显示翻译区域
 
     try {
-      const translationPrompt = `请将以下日语句子翻译成简体中文：\n\n"${japaneseText}"\n\n请仅返回翻译后的中文文本。`;
-      const payload = {
-        model: "gemini-2.5-flash-preview-05-20",
-        reasoning_effort: "none",
-        messages: [{ role: "user", content: translationPrompt }]
-      };
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Error (Full Translate):', errorData);
-        setTranslation(`翻译失败：${errorData.error?.message || response.statusText || '未知错误'}`);
-        return;
-      }
-      
-      const result = await response.json();
-      if (result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
-        setTranslation(result.choices[0].message.content);
-      } else {
-        setTranslation('翻译结果格式错误。');
-        console.error('Unexpected API response structure for full translation:', result);
-      }
+      // 使用服务端API进行翻译
+      const translatedText = await translateText(japaneseText);
+      setTranslation(translatedText);
     } catch (error) {
       console.error('Error during full sentence translation:', error);
       setTranslation(`翻译时发生错误: ${error instanceof Error ? error.message : '未知错误'}。`);
