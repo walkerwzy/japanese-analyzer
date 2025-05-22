@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       const responseText = await response.text();
       try {
         data = JSON.parse(responseText);
-      } catch (jsonError) {
+      } catch (error) {
         console.error('Failed to parse API response:', responseText.substring(0, 200) + '...');
         return NextResponse.json(
           { error: { message: '无法解析API响应，请稍后重试' } },
