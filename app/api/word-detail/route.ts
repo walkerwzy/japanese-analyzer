@@ -42,6 +42,13 @@ export async function POST(req: NextRequest) {
 
     // 构建详情查询请求
     const detailPrompt = `在日语句子 "${sentence}" 的上下文中，${contextWordInfo} 的具体含义是什么？请提供以下信息，并以严格的JSON对象格式返回，不要包含任何markdown或其他非JSON字符：
+
+请特别注意：
+1. 如果是动词，准确识别其时态（过去式、现在式等）、语态（被动、使役等）和礼貌程度（简体、敬体等）
+2. 对于助动词与动词组合（如"食べた"），明确说明原形及活用变化过程
+3. 对于形容词，注意区分い形容词和な形容词，并识别其活用形式
+4. 准确提供辞书形，对于已经是辞书形的词汇，可以填写相同的值
+
 {
   "originalWord": "${word}",
   "chineseTranslation": "中文翻译",
@@ -49,7 +56,7 @@ export async function POST(req: NextRequest) {
   "furigana": "${furigana || ''}",
   "romaji": "${romaji || ''}",
   "dictionaryForm": "辞书形（如果适用）",
-  "explanation": "中文解释（包括外来语来源和活用形原因）"
+  "explanation": "中文解释（包括词形变化、时态、语态等详细语法信息）"
 }`;
 
     const payload = {
