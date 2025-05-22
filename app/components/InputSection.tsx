@@ -45,30 +45,75 @@ export default function InputSection({
     setUploadStatus('正在上传并识别图片中的文字...');
     setUploadStatusClass('mt-2 text-sm text-gray-600');
 
-    // 文件转Base64
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const imageData = reader.result as string; 
+    try {
+      // 压缩图片以减小数据大小
+      const compressedImageData = await compressImage(file);
       
-      try {
-        const imageExtractionPrompt = "请仅提取并返回这张图片中的所有日文文字。不要添加任何其他评论、解释或格式化。如果文字是多行或者分散的，请将它们合并成一个单一的文本字符串，用换行符（\\n）分隔不同的文本块（如果适用）。";
-        
-        // 使用服务端API，传递用户API设置
-        const extractedText = await extractTextFromImage(imageData, imageExtractionPrompt, userApiKey, userApiUrl);
-        setInputText(extractedText); 
-        setUploadStatus('文字提取成功！请确认后点击"解析句子"。');
-        setUploadStatusClass('mt-2 text-sm text-green-600');
-      } catch (error) {
-        console.error('Error during image text extraction:', error);
-        setUploadStatus(`提取时发生错误: ${error instanceof Error ? error.message : '未知错误'}。`);
-        setUploadStatusClass('mt-2 text-sm text-red-600');
-      } finally {
-        setIsImageUploading(false);
-        // 清理file input
-        event.target.value = '';
-      }
-    };
-    reader.readAsDataURL(file);
+      const imageExtractionPrompt = "请仅提取并返回这张图片中的所有日文文字。不要添加任何其他评论、解释或格式化。如果文字是多行或者分散的，请将它们合并成一个单一的文本字符串，用换行符（\\n）分隔不同的文本块（如果适用）。";
+      
+      // 使用服务端API，传递用户API设置
+      const extractedText = await extractTextFromImage(compressedImageData, imageExtractionPrompt, userApiKey, userApiUrl);
+      setInputText(extractedText); 
+      setUploadStatus('文字提取成功！请确认后点击"解析句子"。');
+      setUploadStatusClass('mt-2 text-sm text-green-600');
+    } catch (error) {
+      console.error('Error during image text extraction:', error);
+      setUploadStatus(`提取时发生错误: ${error instanceof Error ? error.message : '未知错误'}。`);
+      setUploadStatusClass('mt-2 text-sm text-red-600');
+    } finally {
+      setIsImageUploading(false);
+      // 清理file input
+      event.target.value = '';
+    }
+  };
+
+  // 图片压缩函数
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // 创建canvas进行图片压缩
+          const canvas = document.createElement('canvas');
+          // 确定压缩后尺寸（保持宽高比）
+          let width = img.width;
+          let height = img.height;
+          
+          // 如果图片尺寸大于1600px，按比例缩小
+          const maxDimension = 1600;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // 在canvas上绘制压缩后的图片
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('无法创建canvas上下文'));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // 转换为dataURL，使用较低的质量
+          const quality = 0.7; // 70%的质量，可以根据需要调整
+          const dataUrl = canvas.toDataURL(file.type, quality);
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject(new Error('图片加载失败'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('无法读取文件'));
+      reader.readAsDataURL(file);
+    });
   };
 
   return (

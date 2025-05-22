@@ -5,10 +5,33 @@ const API_KEY = process.env.API_KEY || '';
 const API_URL = process.env.API_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
 
+// 配置API路由支持大尺寸请求
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 export async function POST(req: NextRequest) {
   try {
-    // 解析请求体
-    const { imageData, prompt, model = MODEL_NAME, apiUrl } = await req.json();
+    // 获取请求内容
+    const requestBody = await req.text();
+    let parsedBody;
+    
+    try {
+      // 尝试解析请求体为JSON
+      parsedBody = JSON.parse(requestBody);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return NextResponse.json(
+        { error: { message: '请求体解析失败，请确保发送有效的JSON格式' } },
+        { status: 400 }
+      );
+    }
+    
+    const { imageData, prompt, model = MODEL_NAME, apiUrl } = parsedBody;
     
     // 从请求头中获取用户提供的API密钥（如果有）
     const authHeader = req.headers.get('Authorization');
@@ -54,6 +77,14 @@ export async function POST(req: NextRequest) {
       ]
     };
 
+    // 验证imageData大小
+    if (imageData.length > 1024 * 1024 * 8) { // 8MB限制
+      return NextResponse.json(
+        { error: { message: '图片数据太大，请压缩后重试' } },
+        { status: 413 }
+      );
+    }
+
     // 发送到实际的AI API
     const response = await fetch(effectiveApiUrl, {
       method: 'POST',
@@ -65,7 +96,25 @@ export async function POST(req: NextRequest) {
     });
 
     // 获取AI API的响应
-    const data = await response.json();
+    let data;
+    try {
+      const responseText = await response.text();
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error('Failed to parse API response:', responseText.substring(0, 200) + '...');
+        return NextResponse.json(
+          { error: { message: '无法解析API响应，请稍后重试' } },
+          { status: 500 }
+        );
+      }
+    } catch (readError) {
+      console.error('Failed to read API response:', readError);
+      return NextResponse.json(
+        { error: { message: '读取API响应时出错，请稍后重试' } },
+        { status: 500 }
+      );
+    }
 
     if (!response.ok) {
       console.error('AI API error (Image):', data);
