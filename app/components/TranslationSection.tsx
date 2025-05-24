@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { translateText } from '../services/api';
+import { translateText, streamTranslateText } from '../services/api';
 
 interface TranslationSectionProps {
   japaneseText: string;
   userApiKey?: string;
   userApiUrl?: string;
+  useStream?: boolean;
 }
 
 export default function TranslationSection({ 
   japaneseText,
   userApiKey,
-  userApiUrl
+  userApiUrl,
+  useStream = true // 默认为true，保持向后兼容
 }: TranslationSectionProps) {
   const [translation, setTranslation] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,15 +28,36 @@ export default function TranslationSection({
 
     setIsLoading(true);
     setIsVisible(true); // 确保显示翻译区域
+    setTranslation(''); // 清空之前的翻译结果
 
     try {
-      // 使用服务端API进行翻译，传递用户API设置
-      const translatedText = await translateText(japaneseText, userApiKey, userApiUrl);
-      setTranslation(translatedText);
+      if (useStream) {
+        // 使用流式API进行翻译
+        streamTranslateText(
+          japaneseText,
+          (chunk, isDone) => {
+            setTranslation(chunk);
+            if (isDone) {
+              setIsLoading(false);
+            }
+          },
+          (error) => {
+            console.error('Error during streaming translation:', error);
+            setTranslation(`翻译时发生错误: ${error.message || '未知错误'}。`);
+            setIsLoading(false);
+          },
+          userApiKey,
+          userApiUrl
+        );
+      } else {
+        // 使用传统API进行翻译
+        const translatedText = await translateText(japaneseText, userApiKey, userApiUrl);
+        setTranslation(translatedText);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('Error during full sentence translation:', error);
       setTranslation(`翻译时发生错误: ${error instanceof Error ? error.message : '未知错误'}。`);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -73,7 +96,7 @@ export default function TranslationSection({
           
           {isVisible && (
             <div id="fullTranslationOutput" className="text-gray-800 p-3 bg-gray-50 rounded-lg min-h-[50px]">
-              {isLoading ? (
+              {isLoading && !translation ? (
                 <div className="flex items-center justify-center py-4">
                   <div className="loading-spinner"></div>
                   <span className="ml-2 text-gray-500">正在翻译，请稍候...</span>

@@ -6,7 +6,8 @@ interface SettingsModalProps {
   userApiKey: string;
   userApiUrl: string;
   defaultApiUrl: string;
-  onSaveSettings: (apiKey: string, apiUrl: string) => void;
+  useStream: boolean;
+  onSaveSettings: (apiKey: string, apiUrl: string, useStream: boolean) => void;
   isModalOpen: boolean;
   onModalClose: () => void;
 }
@@ -15,19 +16,22 @@ export default function SettingsModal({
   userApiKey, 
   userApiUrl,
   defaultApiUrl,
+  useStream,
   onSaveSettings,
   isModalOpen,
   onModalClose
 }: SettingsModalProps) {
   const [apiKey, setApiKey] = useState(userApiKey);
   const [apiUrl, setApiUrl] = useState(userApiUrl === defaultApiUrl ? '' : userApiUrl);
+  const [streamEnabled, setStreamEnabled] = useState(useStream);
   const [status, setStatus] = useState('');
   const [statusClass, setStatusClass] = useState('');
 
   useEffect(() => {
     setApiKey(userApiKey);
     setApiUrl(userApiUrl === defaultApiUrl ? '' : userApiUrl);
-  }, [userApiKey, userApiUrl, defaultApiUrl]);
+    setStreamEnabled(useStream);
+  }, [userApiKey, userApiUrl, defaultApiUrl, useStream]);
 
   const closeModal = () => {
     onModalClose();
@@ -45,7 +49,8 @@ export default function SettingsModal({
     
     onSaveSettings(
       trimmedApiKey, 
-      trimmedApiUrl || defaultApiUrl
+      trimmedApiUrl || defaultApiUrl,
+      streamEnabled
     );
     
     setStatus('设置已保存！');
@@ -112,6 +117,27 @@ export default function SettingsModal({
             />
             <p className="text-xs text-gray-500 mt-1">留空则使用默认端点。</p>
           </div>
+          
+          <div className="mb-4">
+            <div className="flex items-center justify-between">
+              <label htmlFor="useStreamToggle" className="block text-sm font-medium text-gray-700">
+                启用流式输出:
+              </label>
+              <label className="inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  id="useStreamToggle"
+                  className="sr-only peer"
+                  checked={streamEnabled}
+                  onChange={() => setStreamEnabled(!streamEnabled)}
+                />
+                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              流式输出可以实时显示解析结果，但可能在某些网络环境下不稳定。
+            </p>
+          </div>
 
           <button 
             id="saveSettingsButton" 
@@ -123,7 +149,7 @@ export default function SettingsModal({
           {status && <div id="settingsStatus" className={statusClass}>{status}</div>}
           
           <div className="mt-4 text-xs text-gray-500">
-            <p>注意：自定义密钥仅存储在您的浏览器中，不会传输到我们的服务器。</p>
+            <p>注意：自定义设置仅存储在您的浏览器中，不会传输到我们的服务器。</p>
           </div>
         </div>
       </div>

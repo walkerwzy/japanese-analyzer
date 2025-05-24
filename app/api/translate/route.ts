@@ -8,7 +8,7 @@ const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
 export async function POST(req: NextRequest) {
   try {
     // 解析请求体
-    const { text, model = MODEL_NAME, apiUrl } = await req.json();
+    const { text, model = MODEL_NAME, apiUrl, stream = false } = await req.json();
     
     // 从请求头中获取用户提供的API密钥（如果有）
     const authHeader = req.headers.get('Authorization');
@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
     const payload = {
       model: model,
       reasoning_effort: "none",
-      messages: [{ role: "user", content: translationPrompt }]
+      messages: [{ role: "user", content: translationPrompt }],
+      stream: stream
     };
 
     // 发送到实际的AI API
@@ -52,10 +53,8 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    // 获取AI API的响应
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json();
       console.error('AI API error (Translation):', data);
       return NextResponse.json(
         { error: data.error || { message: '翻译请求时出错' } },
@@ -63,8 +62,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 将AI API的响应传回给客户端
-    return NextResponse.json(data);
+    // 如果是流式输出
+    if (stream) {
+      // 将流式响应传回客户端
+      const readableStream = response.body;
+      if (!readableStream) {
+        return NextResponse.json(
+          { error: { message: '流式响应创建失败' } },
+          { status: 500 }
+        );
+      }
+
+      // 创建一个新的流式响应
+      return new NextResponse(readableStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
+    } else {
+      // 非流式输出，按原来方式处理
+      const data = await response.json();
+      return NextResponse.json(data);
+    }
   } catch (error) {
     console.error('Server error (Translation):', error);
     return NextResponse.json(

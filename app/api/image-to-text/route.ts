@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const { imageData, prompt, model = MODEL_NAME, apiUrl } = parsedBody;
+    const { imageData, prompt, model = MODEL_NAME, apiUrl, stream = false } = parsedBody;
     
     // 从请求头中获取用户提供的API密钥（如果有）
     const authHeader = req.headers.get('Authorization');
@@ -57,15 +57,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 优化提示词，避免换行符
+    const defaultPrompt = "请提取并返回这张图片中的所有日文文字。提取的文本应保持原始格式，但不要输出换行符，用空格替代。不要添加任何解释或说明。";
+    
     // 构建发送到AI服务的请求
     const payload = {
       model: model,
       reasoning_effort: "none",
+      stream: stream,
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: prompt || "请提取并返回这张图片中的所有日文文字。不要添加任何解释。" },
+            { type: "text", text: prompt || defaultPrompt },
             {
               type: "image_url",
               image_url: {
@@ -95,37 +99,65 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    // 获取AI API的响应
-    let data;
-    try {
-      const responseText = await response.text();
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        console.error('Failed to parse API response:', responseText.substring(0, 200) + '...');
-        return NextResponse.json(
-          { error: { message: '无法解析API响应，请稍后重试' } },
-          { status: 500 }
-        );
-      }
-    } catch (readError) {
-      console.error('Failed to read API response:', readError);
-      return NextResponse.json(
-        { error: { message: '读取API响应时出错，请稍后重试' } },
-        { status: 500 }
-      );
-    }
-
     if (!response.ok) {
-      console.error('AI API error (Image):', data);
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: '无法解析错误响应' };
+      }
+      
+      console.error('AI API error (Image):', errorData);
       return NextResponse.json(
-        { error: data.error || { message: '处理图片请求时出错' } },
+        { error: errorData.error || { message: '处理图片请求时出错' } },
         { status: response.status }
       );
     }
 
-    // 将AI API的响应传回给客户端
-    return NextResponse.json(data);
+    // 处理流式响应
+    if (stream) {
+      const readableStream = response.body;
+      if (!readableStream) {
+        return NextResponse.json(
+          { error: { message: '流式响应创建失败' } },
+          { status: 500 }
+        );
+      }
+
+      // 创建一个新的流式响应
+      return new NextResponse(readableStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
+    } else {
+      // 非流式输出，按原来方式处理
+      // 获取AI API的响应
+      let data;
+      try {
+        const responseText = await response.text();
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          console.error('Failed to parse API response:', responseText.substring(0, 200) + '...');
+          return NextResponse.json(
+            { error: { message: '无法解析API响应，请稍后重试' } },
+            { status: 500 }
+          );
+        }
+      } catch (readError) {
+        console.error('Failed to read API response:', readError);
+        return NextResponse.json(
+          { error: { message: '读取API响应时出错，请稍后重试' } },
+          { status: 500 }
+        );
+      }
+
+      // 将AI API的响应传回给客户端
+      return NextResponse.json(data);
+    }
   } catch (error) {
     console.error('Server error (Image):', error);
     return NextResponse.json(

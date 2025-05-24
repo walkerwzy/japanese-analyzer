@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 从请求中提取数据
-    const { prompt, model = MODEL_NAME, apiUrl } = requestData;
+    const { prompt, model = MODEL_NAME, apiUrl, stream = false } = requestData;
     
     // 优先使用用户提供的API URL，否则使用环境变量中的URL
     const effectiveApiUrl = apiUrl || API_URL;
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
       model: model,
       reasoning_effort: "none", 
       messages: [{ role: "user", content: prompt }],
+      stream: stream,
     };
 
     // 发送到实际的AI API
@@ -54,10 +55,8 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    // 获取AI API的响应
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json();
       console.error('AI API error:', data);
       return NextResponse.json(
         { error: data.error || { message: '处理请求时出错' } },
@@ -65,8 +64,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 将AI API的响应传回给客户端
-    return NextResponse.json(data);
+    // 如果是流式输出
+    if (stream) {
+      // 将流式响应传回客户端
+      const readableStream = response.body;
+      if (!readableStream) {
+        return NextResponse.json(
+          { error: { message: '流式响应创建失败' } },
+          { status: 500 }
+        );
+      }
+
+      // 创建一个新的流式响应
+      return new NextResponse(readableStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
+    } else {
+      // 非流式输出，按原来方式处理
+      const data = await response.json();
+      return NextResponse.json(data);
+    }
   } catch (error) {
     console.error('Server error:', error);
     return NextResponse.json(
