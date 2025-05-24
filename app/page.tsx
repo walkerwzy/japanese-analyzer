@@ -106,7 +106,7 @@ export default function Home() {
       
       // 尝试解析处理后的内容
       try {
-        const parsed = JSON.parse(processedContent) as any[];
+        const parsed = JSON.parse(processedContent) as Array<TokenData>;
         // 验证数组中的对象是否有必要的字段
         if (Array.isArray(parsed) && parsed.length > 0) {
           const validTokens = parsed.filter(item => 
@@ -211,6 +211,16 @@ export default function Home() {
       setAnalyzedTokens([]);
       setIsAnalyzing(false);
     }
+  };
+
+  // 更新设置
+  const updateSettings = (settings: {
+    apiKey?: string;
+    apiUrl?: string;
+    useStream?: boolean;
+    fontSizeSetting?: string;
+  }) => {
+    // Implementation of updateSettings function
   };
 
   return (
