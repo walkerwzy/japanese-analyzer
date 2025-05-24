@@ -5,9 +5,6 @@ const API_KEY = process.env.API_KEY || '';
 const API_URL = process.env.API_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
 
-// 启用Edge Runtime，适用于Vercel部署
-export const runtime = 'edge';
-
 export async function POST(req: NextRequest) {
   try {
     // 解析请求体

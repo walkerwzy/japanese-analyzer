@@ -183,88 +183,72 @@ export async function streamAnalyzeSentence(
       }, updateDebounceTime);
     };
 
-    try {
-      // 适应Vercel Edge Runtime的流处理
-      try {
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        
+        // 处理buffer中所有完整的行
+        let lines = buffer.split('\n');
+        // 最后一行可能不完整，保留到下一次处理
+        buffer = lines.pop() || '';
+        
+        let hasNewContent = false;
+        
+        for (const line of lines) {
+          if (line.trim() === '') continue;
           
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            buffer += chunk;
-            
-            // 处理buffer中所有完整的行
-            const lines = buffer.split('\n').filter(line => line.trim() !== '');
-            // 最后一行可能不完整，保留到下一次处理
-            buffer = lines.pop() || '';
-            
-            let hasNewContent = false;
-            
-            for (const line of lines) {
-              if (line.trim() === '') continue;
-              
-              if (line.startsWith('data: ')) {
-                const data = line.substring(6);
-                if (data === '[DONE]') {
-                  // 最终结果
-                  onChunk(rawContent, true);
-                  return;
-                }
-                
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                    const content = parsed.choices[0].delta.content;
-                    rawContent += content;
-                    hasNewContent = true;
-                  }
-                } catch (e) {
-                  console.warn('Failed to parse streaming JSON chunk:', e, data);
-                }
-              }
+          if (line.startsWith('data: ')) {
+            const data = line.substring(6);
+            if (data === '[DONE]') {
+              // 最终结果
+              onChunk(rawContent, true);
+              return;
             }
             
-            // 只有在内容有更新时才触发更新
-            if (hasNewContent) {
-              debouncedUpdate(rawContent, false);
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+                const content = parsed.choices[0].delta.content;
+                rawContent += content;
+                hasNewContent = true;
+              }
+            } catch (e) {
+              console.warn('Failed to parse streaming JSON chunk:', e, data);
             }
           }
         }
         
-        // 处理最后可能剩余的数据
-        if (buffer.trim() !== '') {
-          if (buffer.startsWith('data: ')) {
-            const data = buffer.substring(6);
-            if (data !== '[DONE]') {
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                  const content = parsed.choices[0].delta.content;
-                  rawContent += content;
-                }
-              } catch (e) {
-                console.warn('Failed to parse final streaming JSON chunk:', e, data);
-              }
-            }
-          }
-        }
-        
-        // 最终结果
-        onChunk(rawContent, true);
-      } catch (streamError) {
-        console.error('Edge Runtime streaming error:', streamError);
-        // 尝试返回已收集的内容
-        if (rawContent) {
-          onChunk(rawContent, true);
-        } else {
-          onError(streamError instanceof Error ? streamError : new Error('流处理错误'));
+        // 只有在内容有更新时才触发更新
+        if (hasNewContent) {
+          debouncedUpdate(rawContent, false);
         }
       }
-    } catch (error) {
-      console.error('Error in stream analyzing sentence:', error);
-      onError(error instanceof Error ? error : new Error('未知错误'));
     }
+    
+    // 处理最后可能剩余的数据
+    if (buffer.trim() !== '') {
+      if (buffer.startsWith('data: ')) {
+        const data = buffer.substring(6);
+        if (data !== '[DONE]') {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              const content = parsed.choices[0].delta.content;
+              rawContent += content;
+            }
+          } catch (e) {
+            console.warn('Failed to parse final streaming JSON chunk:', e, data);
+          }
+        }
+      }
+    }
+    
+    // 最终结果
+    onChunk(rawContent, true);
   } catch (error) {
     console.error('Error in stream analyzing sentence:', error);
     onError(error instanceof Error ? error : new Error('未知错误'));
@@ -333,88 +317,72 @@ export async function streamTranslateText(
       }, updateDebounceTime);
     };
 
-    try {
-      // 适应Vercel Edge Runtime的流处理
-      try {
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        
+        // 处理buffer中所有完整的行
+        let lines = buffer.split('\n');
+        // 最后一行可能不完整，保留到下一次处理
+        buffer = lines.pop() || '';
+        
+        let hasNewContent = false;
+        
+        for (const line of lines) {
+          if (line.trim() === '') continue;
           
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            buffer += chunk;
-            
-            // 处理buffer中所有完整的行
-            const lines = buffer.split('\n').filter(line => line.trim() !== '');
-            // 最后一行可能不完整，保留到下一次处理
-            buffer = lines.pop() || '';
-            
-            let hasNewContent = false;
-            
-            for (const line of lines) {
-              if (line.trim() === '') continue;
-              
-              if (line.startsWith('data: ')) {
-                const data = line.substring(6);
-                if (data === '[DONE]') {
-                  // 最终结果
-                  onChunk(rawContent, true);
-                  return;
-                }
-                
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                    const content = parsed.choices[0].delta.content;
-                    rawContent += content;
-                    hasNewContent = true;
-                  }
-                } catch (e) {
-                  console.warn('Failed to parse streaming JSON chunk:', e, data);
-                }
-              }
+          if (line.startsWith('data: ')) {
+            const data = line.substring(6);
+            if (data === '[DONE]') {
+              // 最终结果
+              onChunk(rawContent, true);
+              return;
             }
             
-            // 只有在内容有更新时才触发更新
-            if (hasNewContent) {
-              debouncedUpdate(rawContent, false);
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+                const content = parsed.choices[0].delta.content;
+                rawContent += content;
+                hasNewContent = true;
+              }
+            } catch (e) {
+              console.warn('Failed to parse streaming JSON chunk:', e, data);
             }
           }
         }
         
-        // 处理最后可能剩余的数据
-        if (buffer.trim() !== '') {
-          if (buffer.startsWith('data: ')) {
-            const data = buffer.substring(6);
-            if (data !== '[DONE]') {
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                  const content = parsed.choices[0].delta.content;
-                  rawContent += content;
-                }
-              } catch (e) {
-                console.warn('Failed to parse final streaming JSON chunk:', e, data);
-              }
-            }
-          }
-        }
-        
-        // 最终结果
-        onChunk(rawContent, true);
-      } catch (streamError) {
-        console.error('Edge Runtime streaming error:', streamError);
-        // 尝试返回已收集的内容
-        if (rawContent) {
-          onChunk(rawContent, true);
-        } else {
-          onError(streamError instanceof Error ? streamError : new Error('流处理错误'));
+        // 只有在内容有更新时才触发更新
+        if (hasNewContent) {
+          debouncedUpdate(rawContent, false);
         }
       }
-    } catch (error) {
-      console.error('Error in stream translating text:', error);
-      onError(error instanceof Error ? error : new Error('未知错误'));
     }
+    
+    // 处理最后可能剩余的数据
+    if (buffer.trim() !== '') {
+      if (buffer.startsWith('data: ')) {
+        const data = buffer.substring(6);
+        if (data !== '[DONE]') {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              const content = parsed.choices[0].delta.content;
+              rawContent += content;
+            }
+          } catch (e) {
+            console.warn('Failed to parse final streaming JSON chunk:', e, data);
+          }
+        }
+      }
+    }
+    
+    // 最终结果
+    onChunk(rawContent, true);
   } catch (error) {
     console.error('Error in stream translating text:', error);
     onError(error instanceof Error ? error : new Error('未知错误'));
@@ -625,88 +593,72 @@ export async function streamExtractTextFromImage(
       }, updateDebounceTime);
     };
 
-    try {
-      // 适应Vercel Edge Runtime的流处理
-      try {
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        
+        // 处理buffer中所有完整的行
+        let lines = buffer.split('\n');
+        // 最后一行可能不完整，保留到下一次处理
+        buffer = lines.pop() || '';
+        
+        let hasNewContent = false;
+        
+        for (const line of lines) {
+          if (line.trim() === '') continue;
           
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            buffer += chunk;
-            
-            // 处理buffer中所有完整的行
-            const lines = buffer.split('\n').filter(line => line.trim() !== '');
-            // 最后一行可能不完整，保留到下一次处理
-            buffer = lines.pop() || '';
-            
-            let hasNewContent = false;
-            
-            for (const line of lines) {
-              if (line.trim() === '') continue;
-              
-              if (line.startsWith('data: ')) {
-                const data = line.substring(6);
-                if (data === '[DONE]') {
-                  // 最终结果
-                  onChunk(rawContent, true);
-                  return;
-                }
-                
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                    const content = parsed.choices[0].delta.content;
-                    rawContent += content;
-                    hasNewContent = true;
-                  }
-                } catch (e) {
-                  console.warn('Failed to parse streaming JSON chunk:', e, data);
-                }
-              }
+          if (line.startsWith('data: ')) {
+            const data = line.substring(6);
+            if (data === '[DONE]') {
+              // 最终结果
+              onChunk(rawContent, true);
+              return;
             }
             
-            // 只有在内容有更新时才触发更新
-            if (hasNewContent) {
-              debouncedUpdate(rawContent, false);
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+                const content = parsed.choices[0].delta.content;
+                rawContent += content;
+                hasNewContent = true;
+              }
+            } catch (e) {
+              console.warn('Failed to parse streaming JSON chunk:', e, data);
             }
           }
         }
         
-        // 处理最后可能剩余的数据
-        if (buffer.trim() !== '') {
-          if (buffer.startsWith('data: ')) {
-            const data = buffer.substring(6);
-            if (data !== '[DONE]') {
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                  const content = parsed.choices[0].delta.content;
-                  rawContent += content;
-                }
-              } catch (e) {
-                console.warn('Failed to parse final streaming JSON chunk:', e, data);
-              }
-            }
-          }
-        }
-        
-        // 最终结果
-        onChunk(rawContent, true);
-      } catch (streamError) {
-        console.error('Edge Runtime streaming error:', streamError);
-        // 尝试返回已收集的内容
-        if (rawContent) {
-          onChunk(rawContent, true);
-        } else {
-          onError(streamError instanceof Error ? streamError : new Error('流处理错误'));
+        // 只有在内容有更新时才触发更新
+        if (hasNewContent) {
+          debouncedUpdate(rawContent, false);
         }
       }
-    } catch (error) {
-      console.error('Error in stream extracting text from image:', error);
-      onError(error instanceof Error ? error : new Error('未知错误'));
     }
+    
+    // 处理最后可能剩余的数据
+    if (buffer.trim() !== '') {
+      if (buffer.startsWith('data: ')) {
+        const data = buffer.substring(6);
+        if (data !== '[DONE]') {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              const content = parsed.choices[0].delta.content;
+              rawContent += content;
+            }
+          } catch (e) {
+            console.warn('Failed to parse final streaming JSON chunk:', e, data);
+          }
+        }
+      }
+    }
+    
+    // 最终结果
+    onChunk(rawContent, true);
   } catch (error) {
     console.error('Error in stream extracting text from image:', error);
     onError(error instanceof Error ? error : new Error('未知错误'));

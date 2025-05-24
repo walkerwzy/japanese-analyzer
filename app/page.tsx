@@ -106,7 +106,7 @@ export default function Home() {
       
       // 尝试解析处理后的内容
       try {
-        const parsed = JSON.parse(processedContent) as TokenData[];
+        const parsed = JSON.parse(processedContent) as any[];
         // 验证数组中的对象是否有必要的字段
         if (Array.isArray(parsed) && parsed.length > 0) {
           const validTokens = parsed.filter(item => 

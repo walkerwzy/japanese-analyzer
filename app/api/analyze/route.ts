@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// 启用Edge Runtime，适用于Vercel部署
-export const runtime = 'edge';
-
 // API密钥从环境变量获取，不暴露给前端
 const API_KEY = process.env.API_KEY || '';
 const API_URL = process.env.API_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
@@ -78,11 +75,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // 在Vercel Edge Runtime中，直接传递响应流
+      // 创建一个新的流式响应
       return new NextResponse(readableStream, {
         headers: {
           'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache, no-transform',
+          'Cache-Control': 'no-cache',
           'Connection': 'keep-alive'
         }
       });
