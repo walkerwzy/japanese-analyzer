@@ -22,6 +22,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
+        {/* 预连接谷歌字体CDN以提高加载速度 */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* 使用CDN直接加载Noto Sans JP字体，避免Vercel构建问题 */}
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap"

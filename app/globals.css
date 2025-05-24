@@ -503,6 +503,25 @@ rb {
   }
 }
 
+/* Safari特定字体修复 */
+@media not all and (min-resolution:.001dpcm) { 
+  @supports (-webkit-appearance:none) {
+    textarea, input, .word-token, .ruby-base {
+      font-family: -apple-system, 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', sans-serif !important;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+}
+
+/* 日语字体通用兼容设置 */
+textarea, 
+input[type="text"], 
+.japanese-text,
+#japaneseInput {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
 /* 词语详情模态窗口样式 */
 .word-detail-modal {
   position: fixed;

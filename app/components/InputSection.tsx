@@ -151,7 +151,7 @@ export default function InputSection({
       <div className="relative">
         <textarea 
           id="japaneseInput" 
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-[#007AFF] transition duration-150 ease-in-out resize-none" 
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-[#007AFF] transition duration-150 ease-in-out resize-none japanese-text" 
           rows={4} 
           placeholder="例：今日はいい天気ですね。或上传图片识别文字。"
           value={inputText}
