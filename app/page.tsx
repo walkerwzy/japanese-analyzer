@@ -7,6 +7,17 @@ import TranslationSection from './components/TranslationSection';
 import SettingsModal from './components/SettingsModal';
 import { analyzeSentence, TokenData, DEFAULT_API_URL, streamAnalyzeSentence } from './services/api';
 
+// 类型定义
+interface StreamCallback {
+  (chunk: string, isDone: boolean): void;
+}
+
+interface ApiResponse {
+  result: string;
+  // 其他可能的字段
+  [key: string]: unknown;
+}
+
 export default function Home() {
   const [currentSentence, setCurrentSentence] = useState('');
   const [analyzedTokens, setAnalyzedTokens] = useState<TokenData[]>([]);
@@ -106,7 +117,7 @@ export default function Home() {
       
       // 尝试解析处理后的内容
       try {
-        const parsed = JSON.parse(processedContent) as any[];
+        const parsed = JSON.parse(processedContent) as TokenData[];
         // 验证数组中的对象是否有必要的字段
         if (Array.isArray(parsed) && parsed.length > 0) {
           const validTokens = parsed.filter(item => 
