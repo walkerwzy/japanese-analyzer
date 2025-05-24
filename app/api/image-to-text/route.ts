@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       let errorData;
       try {
         errorData = await response.json();
-      } catch (e) {
+      } catch (_) {
         errorData = { message: '无法解析错误响应' };
       }
       

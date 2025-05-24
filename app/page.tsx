@@ -106,14 +106,14 @@ export default function Home() {
       
       // 尝试解析处理后的内容
       try {
-        const parsed = JSON.parse(processedContent) as any[];
+        const parsed = JSON.parse(processedContent) as TokenData[];
         // 验证数组中的对象是否有必要的字段
         if (Array.isArray(parsed) && parsed.length > 0) {
           const validTokens = parsed.filter(item => 
             item && typeof item === 'object' && 'word' in item && 'pos' in item
           );
           if (validTokens.length > 0) {
-            return validTokens as TokenData[];
+            return validTokens;
           }
         }
         return [];
