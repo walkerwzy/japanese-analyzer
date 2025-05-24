@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// 启用Edge Runtime，适用于Vercel部署
+export const runtime = 'edge';
+
 // API密钥从环境变量获取，不暴露给前端
 const API_KEY = process.env.API_KEY || '';
 const API_URL = process.env.API_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
-
-// 配置API路由支持大尺寸请求
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
 
 export async function POST(req: NextRequest) {
   try {
@@ -124,11 +118,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // 创建一个新的流式响应
+      // 在Vercel Edge Runtime中，直接传递响应流
       return new NextResponse(readableStream, {
         headers: {
           'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-transform',
           'Connection': 'keep-alive'
         }
       });
