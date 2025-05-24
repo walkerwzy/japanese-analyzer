@@ -31,7 +31,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), var(--font-noto), sans-serif;
+  font-family: Inter, 'Noto Sans JP', sans-serif;
   color: rgb(var(--foreground-rgb));
   background-color: #f0f2f5;
 }
@@ -500,5 +500,84 @@ rb {
 @media (max-width: 640px) {
   textarea {
     font-size: 16px !important; /* 防止iOS缩放 */
+  }
+}
+
+/* 词语详情模态窗口样式 */
+.word-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 15px;
+  animation: fadeInModal 0.2s ease;
+  will-change: opacity;
+}
+
+.word-detail-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: zoomInModal 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes zoomInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #e5e5ea;
+  color: #8e8e93;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  line-height: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.modal-close-button:hover {
+  background-color: #d1d1d6;
+  color: #000;
+}
+
+/* 在较小的设备上调整模态窗口样式 */
+@media (max-width: 480px) {
+  .word-detail-modal-content {
+    padding: 15px;
+    border-radius: 10px;
+  }
+  
+  .modal-close-button {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+    line-height: 26px;
   }
 }

@@ -27,6 +27,24 @@ export default function AnalysisResult({
   const [activeWordToken, setActiveWordToken] = useState<HTMLElement | null>(null);
   const [wordDetail, setWordDetail] = useState<WordDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 检测设备是否为移动端
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // 初始检测
+    checkIsMobile();
+    
+    // 窗口大小变化时重新检测
+    window.addEventListener('resize', checkIsMobile);
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
 
   const handleWordClick = async (e: React.MouseEvent<HTMLSpanElement>, token: TokenData) => {
     e.stopPropagation();
@@ -36,6 +54,9 @@ export default function AnalysisResult({
     if (activeWordToken === target) {
       setActiveWordToken(null);
       setWordDetail(null);
+      if (isMobile) {
+        setIsModalOpen(false);
+      }
       return;
     }
 
@@ -46,8 +67,16 @@ export default function AnalysisResult({
     target.classList.add('active-word');
     setActiveWordToken(target);
     
-    // 获取词汇详情
-    await fetchWordDetails(token.word, token.pos, originalSentence, token.furigana, token.romaji);
+    // 如果是移动端，先打开模态窗口，显示加载动画
+    if (isMobile) {
+      setIsLoading(true);
+      setIsModalOpen(true);
+      // 然后获取词汇详情
+      await fetchWordDetails(token.word, token.pos, originalSentence, token.furigana, token.romaji);
+    } else {
+      // PC端保持原来的逻辑
+      await fetchWordDetails(token.word, token.pos, originalSentence, token.furigana, token.romaji);
+    }
   };
 
   const fetchWordDetails = async (word: string, pos: string, sentence: string, furigana?: string, romaji?: string) => {
@@ -79,6 +108,7 @@ export default function AnalysisResult({
       setActiveWordToken(null);
     }
     setWordDetail(null);
+    setIsModalOpen(false);
   }, [activeWordToken]);
 
   // 点击外部关闭详情
@@ -89,6 +119,7 @@ export default function AnalysisResult({
         wordDetail && 
         !(activeWordToken.contains(event.target as Node)) && 
         !(document.getElementById('wordDetailInlineContainer')?.contains(event.target as Node)) &&
+        !(document.getElementById('wordDetailModal')?.contains(event.target as Node)) &&
         !(event.target as Element)?.closest('.word-unit-wrapper')
       ) {
         handleCloseWordDetail();
@@ -100,6 +131,62 @@ export default function AnalysisResult({
       document.removeEventListener('click', handleClickOutside);
     };
   }, [activeWordToken, wordDetail, handleCloseWordDetail]);
+
+  // 词语详情内容组件
+  const WordDetailContent = () => (
+    <>
+      <h3 className="text-xl font-semibold text-[#007AFF] mb-3">词汇详解</h3>
+      <p className="mb-1">
+        <strong>原文:</strong> 
+        <span className="font-mono text-lg text-gray-800">{wordDetail?.originalWord}</span> 
+        <button 
+          className="read-aloud-button" 
+          title="朗读此词汇"
+          onClick={() => speakJapanese(wordDetail?.originalWord || '')}
+        >
+          <i className="fas fa-volume-up"></i>
+        </button>
+      </p>
+      
+      {wordDetail?.furigana && (
+        <p className="mb-1">
+          <strong>读音 (Furigana):</strong> 
+          <span className="text-sm text-purple-700">{wordDetail.furigana}</span>
+        </p>
+      )}
+      
+      {wordDetail?.romaji && (
+        <p className="mb-1">
+          <strong>罗马音 (Romaji):</strong> 
+          <span className="text-sm text-cyan-700">{wordDetail.romaji}</span>
+        </p>
+      )}
+      
+      {wordDetail?.dictionaryForm && wordDetail.dictionaryForm !== wordDetail.originalWord && (
+        <p className="mb-2">
+          <strong>辞书形:</strong> 
+          <span className="text-md text-blue-700 font-medium">{wordDetail.dictionaryForm}</span>
+        </p>
+      )}
+      
+      <p className="mb-2">
+        <strong>词性:</strong> 
+        <span className={`detail-pos-tag ${getPosClass(wordDetail?.pos || '')}`}>
+          {wordDetail?.pos} ({posChineseMap[wordDetail?.pos.split('-')[0] || ''] || posChineseMap['default']})
+        </span>
+      </p>
+      
+      <p className="mb-2">
+        <strong>中文译文:</strong> 
+        <span className="text-lg text-green-700 font-medium">{wordDetail?.chineseTranslation}</span>
+      </p>
+      
+      <div className="mb-1"><strong>解释:</strong></div>
+      <p className="text-gray-700 bg-gray-50 p-3 rounded-md text-base leading-relaxed">
+        {wordDetail?.explanation}
+      </p>
+    </>
+  );
 
   if (!tokens || tokens.length === 0) {
     return null;
@@ -134,7 +221,8 @@ export default function AnalysisResult({
         ))}
       </div>
       
-      {(isLoading || wordDetail) && (
+      {/* 非移动端的内嵌详情展示 */}
+      {!isMobile && (isLoading || wordDetail) && (
         <div id="wordDetailInlineContainer" style={{ display: 'block' }}>
           <button 
             className="detail-close-button" 
@@ -149,60 +237,35 @@ export default function AnalysisResult({
               <div className="loading-spinner"></div>
               <span className="ml-2 text-gray-600">正在查询释义...</span>
             </div>
-          ) : wordDetail && (
-            <>
-              <h3 className="text-xl font-semibold text-[#007AFF] mb-3">词汇详解</h3>
-              <p className="mb-1">
-                <strong>原文:</strong> 
-                <span className="font-mono text-lg text-gray-800">{wordDetail.originalWord}</span> 
-                <button 
-                  className="read-aloud-button" 
-                  title="朗读此词汇"
-                  onClick={() => speakJapanese(wordDetail.originalWord)}
-                >
-                  <i className="fas fa-volume-up"></i>
-                </button>
-              </p>
-              
-              {wordDetail.furigana && (
-                <p className="mb-1">
-                  <strong>读音 (Furigana):</strong> 
-                  <span className="text-sm text-purple-700">{wordDetail.furigana}</span>
-                </p>
-              )}
-              
-              {wordDetail.romaji && (
-                <p className="mb-1">
-                  <strong>罗马音 (Romaji):</strong> 
-                  <span className="text-sm text-cyan-700">{wordDetail.romaji}</span>
-                </p>
-              )}
-              
-              {wordDetail.dictionaryForm && wordDetail.dictionaryForm !== wordDetail.originalWord && (
-                <p className="mb-2">
-                  <strong>辞书形:</strong> 
-                  <span className="text-md text-blue-700 font-medium">{wordDetail.dictionaryForm}</span>
-                </p>
-              )}
-              
-              <p className="mb-2">
-                <strong>词性:</strong> 
-                <span className={`detail-pos-tag ${getPosClass(wordDetail.pos)}`}>
-                  {wordDetail.pos} ({posChineseMap[wordDetail.pos.split('-')[0]] || posChineseMap['default']})
-                </span>
-              </p>
-              
-              <p className="mb-2">
-                <strong>中文译文:</strong> 
-                <span className="text-lg text-green-700 font-medium">{wordDetail.chineseTranslation}</span>
-              </p>
-              
-              <div className="mb-1"><strong>解释:</strong></div>
-              <p className="text-gray-700 bg-gray-50 p-3 rounded-md text-base leading-relaxed">
-                {wordDetail.explanation}
-              </p>
-            </>
+          ) : (
+            <WordDetailContent />
           )}
+        </div>
+      )}
+      
+      {/* 移动端的模态窗口详情展示 */}
+      {isMobile && isModalOpen && (
+        <div id="wordDetailModal" className="word-detail-modal" onClick={(e) => {
+          if (e.target === e.currentTarget) handleCloseWordDetail();
+        }}>
+          <div className="word-detail-modal-content">
+            <button 
+              className="modal-close-button" 
+              title="关闭详情"
+              onClick={handleCloseWordDetail}
+            >
+              &times;
+            </button>
+            
+            {isLoading ? (
+              <div className="flex items-center justify-center py-5">
+                <div className="loading-spinner"></div>
+                <span className="ml-2 text-gray-600">正在查询释义...</span>
+              </div>
+            ) : (
+              <WordDetailContent />
+            )}
+          </div>
         </div>
       )}
       
