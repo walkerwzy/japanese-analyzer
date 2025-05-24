@@ -192,7 +192,7 @@ export async function streamAnalyzeSentence(
         buffer += chunk;
         
         // 处理buffer中所有完整的行
-        const lines = buffer.split('\n');
+        let lines = buffer.split('\n');
         // 最后一行可能不完整，保留到下一次处理
         buffer = lines.pop() || '';
         
@@ -326,7 +326,7 @@ export async function streamTranslateText(
         buffer += chunk;
         
         // 处理buffer中所有完整的行
-        const lines = buffer.split('\n');
+        let lines = buffer.split('\n');
         // 最后一行可能不完整，保留到下一次处理
         buffer = lines.pop() || '';
         
@@ -602,7 +602,7 @@ export async function streamExtractTextFromImage(
         buffer += chunk;
         
         // 处理buffer中所有完整的行
-        const lines = buffer.split('\n');
+        let lines = buffer.split('\n');
         // 最后一行可能不完整，保留到下一次处理
         buffer = lines.pop() || '';
         

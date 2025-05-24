@@ -21,6 +21,7 @@ export default function InputSection({
   const [isImageUploading, setIsImageUploading] = useState(false); 
   const [uploadStatus, setUploadStatus] = useState('');
   const [uploadStatusClass, setUploadStatusClass] = useState('');
+  const [imageTextStream, setImageTextStream] = useState('');
 
   const handleAnalyze = () => {
     if (!inputText.trim()) {
@@ -46,6 +47,8 @@ export default function InputSection({
     setIsImageUploading(true);
     setUploadStatus('正在上传并识别图片中的文字...');
     setUploadStatusClass('mt-2 text-sm text-gray-600');
+    setImageTextStream(''); // 清空之前的流式内容
+    setInputText(''); // 清空输入框
 
     try {
       // 压缩图片以减小数据大小
@@ -59,7 +62,8 @@ export default function InputSection({
         streamExtractTextFromImage(
           compressedImageData,
           (chunk, isDone) => {
-            setInputText(chunk);
+            setImageTextStream(chunk);
+            setInputText(chunk); // 实时更新输入框
             
             if (isDone) {
               setIsImageUploading(false);
