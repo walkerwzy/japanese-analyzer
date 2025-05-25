@@ -295,8 +295,8 @@ export default function Home() {
         </main>
 
         <footer className="text-center mt-8 sm:mt-12 py-4 sm:py-6 border-t border-gray-200">
-          <p className="text-gray-500 text-xs sm:text-sm">&copy; 2025 高级日语解析工具. All rights reserved.</p>
-          <p className="text-gray-400 text-xs mt-1">Powered by Gemini AI</p>
+          <p className="text-gray-500 text-xs sm:text-sm">&copy; 2025 高级日语解析工具 by Howen. All rights reserved.</p>
+          
         </footer>
       </div>
       
