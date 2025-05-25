@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { extractTextFromImage, streamExtractTextFromImage } from '../services/api';
 
 // 添加内联样式
