@@ -13,11 +13,11 @@ https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
 ## ✨ 核心功能
 
 - **🔍 智能句子分析** - 自动识别和标注日语句子中的每个词汇，包括词性、发音和罗马音
-- **📚 详细词义解释** - 为每个词汇提供全面的中文释义，包含常用例句和用法说明
-- **🖼️ OCR图像识别** - 支持从图片中提取日文文本，方便处理教材、漫画等图像内容
-- **🔈 语音朗读功能** - 内置日语发音系统，帮助用户掌握正确的发音
+- **📚 详细词义解释** - 为每个词汇提供全面的中文释义
+- **🖼️ OCR图像识别** - 支持从图片中提取日文文本
+- **🔈 语音朗读功能** - 使用系统TTS朗读日语
 - **🔄 整句翻译** - 提供完整句子的中文翻译，方便理解整体含义
-- **🌐 流式处理** - 采用流式API响应，提供更快的分析体验
+- **🌐 流式处理** - 采用流式API响应，有更好的用户体验
 - **🛠️ 自定义设置** - 允许用户配置自己的API密钥和服务URL
 
 ## 🚀 快速开始
@@ -27,34 +27,8 @@ https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
 - 拥有Node.js环境 (推荐v18+)
 - 拥有一个Gemini API密钥（必需）
 
-### 本地开发
 
-1. 克隆仓库到本地
-   ```bash
-   git clone https://github.com/yourusername/japanese-analyzer.git
-   cd japanese-analyzer
-   ```
-
-2. 安装依赖
-   ```bash
-   npm install
-   ```
-
-3. 创建环境变量文件
-   在项目根目录创建`.env.local`文件，添加以下内容：
-   ```
-   API_KEY=your_gemini_api_key_here
-   API_URL=https://your-custom-api-url.com (可选)
-   ```
-
-4. 启动开发服务器
-   ```bash
-   npm run dev
-   ```
-
-5. 打开浏览器访问 http://localhost:3000
-
-### 生产环境部署
+### Vercel部署
 
 #### Vercel部署（推荐）
 
@@ -65,22 +39,8 @@ https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
    - `API_URL`: 自定义API URL（可选）
 4. 点击部署，等待部署完成
 
-## 💻 使用指南
 
-1. **文本输入**：直接在输入框中输入日语句子，或使用OCR功能从图片中提取
-2. **分析句子**：点击"分析"按钮开始处理
-3. **查看结果**：系统会显示词汇分解、词性标注和详细释义
-4. **听取发音**：点击语音图标可以听取整句或单词的发音
-5. **查看翻译**：页面底部会显示整句的中文翻译
 
-## 🔧 技术栈
-
-- **前端框架**: React 19 + Next.js 15
-- **UI设计**: TailwindCSS 4
-- **类型检查**: TypeScript
-- **API交互**: 基于Gemini AI API
-- **构建工具**: Turbopack
-- **部署平台**: Vercel
 
 ## 🤝 参与贡献
 
@@ -97,8 +57,5 @@ MIT
 
 ## 📞 联系方式
 
-如有问题或建议，请通过GitHub Issues与我们联系。
+如有问题或建议，请通过GitHub Issues联系。
 
----
-
-**小贴士**: 在使用OCR功能时，请确保图片中的文字清晰可见，以获得最佳识别效果。
