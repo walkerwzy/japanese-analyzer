@@ -3,7 +3,8 @@
 AI驱动的日语文章解析工具，帮助中文用户深入理解日语句子结构与词义。
 ## 演示
 
-https://github.com/cokice/japanese-analyzer/media/video.mp4
+https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
+
 
 ## 特点
 
