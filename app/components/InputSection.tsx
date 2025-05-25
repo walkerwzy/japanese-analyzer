@@ -1,7 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { extractTextFromImage, streamExtractTextFromImage } from '../services/api';
+
+// 添加内联样式
+const placeholderStyle = `
+  #japaneseInput::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+    opacity: 0.6 !important;
+  }
+`;
 
 interface InputSectionProps {
   onAnalyze: (text: string) => void;
@@ -147,16 +155,26 @@ export default function InputSection({
 
   return (
     <div className="premium-card">
+      <style dangerouslySetInnerHTML={{ __html: placeholderStyle }} />
       <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-3 sm:mb-4">输入日语句子</h2>
       <div className="relative">
         <textarea 
           id="japaneseInput" 
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-[#007AFF] transition duration-150 ease-in-out resize-none" 
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-[#007AFF] transition duration-150 ease-in-out resize-none japanese-text" 
           rows={4} 
           placeholder="例：今日はいい天気ですね。或上传图片识别文字。"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          style={{ fontSize: '16px' }} // 防止移动设备缩放
+          style={{ 
+            fontSize: '16px', // 防止移动设备缩放
+            WebkitTextFillColor: 'black', // Safari特定修复
+            color: 'black',
+            fontFamily: "'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif"
+          }}
+          autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck="false"
         ></textarea>
         {inputText.trim() !== '' && (
           <button 

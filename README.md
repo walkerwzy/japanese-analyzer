@@ -1,6 +1,9 @@
 # 日本語文章解析器
 
 AI驱动的日语文章解析工具，帮助中文用户深入理解日语句子结构与词义。
+## 演示
+
+https://github.com/cokice/japanese-analyzer/media/video.mp4
 
 ## 特点
 
@@ -10,23 +13,16 @@ AI驱动的日语文章解析工具，帮助中文用户深入理解日语句子
 - 🔈 内置朗读功能
 - 🔄 整句翻译为中文
 
-
 ## 部署说明
 
 
 ### Vercel部署
 
-1. 在Vercel部署项目
+1. fork本项目
+1. 在Vercel选择fork后的项目部署
 2. 在Vercel项目设置中添加以下环境变量：
    - `API_URL`: Gemini API URL（可选）
    - `API_KEY`: 你的Gemini API密钥（必选）
-
-### 技术栈
-
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Gemini AI API
 
 ## 许可证
 
