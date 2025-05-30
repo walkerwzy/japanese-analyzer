@@ -1,62 +1,59 @@
-# 日本語文章解析器 (Japanese Sentence Analyzer)
+# Japanese Sentence Analyzer (日本語文章解析器) 🈁
 
-AI驱动的日语文章解析工具，帮助中文用户深入理解日语句子结构与词义。通过智能分析，为日语学习者提供详细的句子解构和单词释义。
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](#-许可证)
+[![Demo](https://img.shields.io/badge/demo-online-blue.svg)](https://japanese-analyzer-demo.vercel.app/)
 
-## 📝 项目简介
+> **AI 驱动的日语句子深度解析工具**  
+> 面向中文学习者，拆解句法结构、标注词性、呈现发音与释义，让读懂日语不再困难。
+---
 
-日本語文章解析器是一个面向中文用户的日语学习辅助工具，基于先进的AI技术，能够对日语句子进行深度解析，帮助用户理解日语语法结构、词性功能和详细词义。无论是初学者还是进阶学习者，都能从这个工具中获得有价值的学习帮助。
+## ✨ 主要特性
+| 功能 | 描述 |
+| :-- | :-- |
+| 🔍 **智能句法标注** | 一键输出词性、假名、罗马音与语法成分 |
+| 📚 **多维词义解释** | 集合权威词典，提供精准中文释义 |
+| 🖼️ **OCR 图像识别** | 从截图或照片中提取日语文本并立即解析 |
+| 🔈 **原声 TTS 朗读** | 系统级 TTS 还原纯正日语发音 |
+| 🔄 **整句翻译** | 双语对照，迅速把握整体含义 |
+| 🌐 **流式响应** | 基于流式 API，交互更丝滑 |
+| ⚙️ **高度可配置** | 支持自定义 Gemini API Key / Endpoint |
 
-[演示地址](https://japanese-analyzer-demo.vercel.app/)
-## 🎬 演示
+---
 
+## 🚀 在线体验
+立即在浏览器中试用 👉 **[Demo](https://japanese-analyzer-demo.vercel.app/)**
+
+或查看演示视频
 https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
+---
 
-## ✨ 核心功能
+### 一键部署到 Vercel（推荐）
+1. **Fork** 本仓库到自己的 GitHub 账户  
+2. 在 [Vercel](https://vercel.com/) 中 **Import** 该仓库  
+3. 在 *Project Settings › Environment Variables* 添加：  
 
-- **🔍 智能句子分析** - 自动识别和标注日语句子中的每个词汇，包括词性、发音和罗马音
-- **📚 详细词义解释** - 为每个词汇提供全面的中文释义
-- **🖼️ OCR图像识别** - 支持从图片中提取日文文本
-- **🔈 语音朗读功能** - 使用系统TTS朗读日语
-- **🔄 整句翻译** - 提供完整句子的中文翻译，方便理解整体含义
-- **🌐 流式处理** - 采用流式API响应，有更好的用户体验
-- **🛠️ 自定义设置** - 允许用户配置自己的API密钥和服务URL
+   | 变量名 | 必填 | 说明 |
+   | :--- | :---: | :--- |
+   | `API_KEY` | ✅ | 你的 Gemini API 密钥 |
+   | `API_URL` | ❌ | 自定义接口地址（留空使用默认） |
 
-## 🚀 快速开始
+4. 点击 **Deploy**，几秒后即可访问专属域名 ✨
+---
 
-### 前提条件
+## 🤝 如何贡献
+我们热忱欢迎任何形式的贡献！
 
-- 拥有Node.js环境 (推荐v18+)
-- 拥有一个Gemini API密钥（必需）
+- 🐛 **报告 Bug**：在 Issues 中描述复现步骤  
+- 🚀 **提出功能**：新特性 Idea & 需求讨论  
+- 💻 **提交代码**：Pull Request  
 
-
-### Vercel部署
-
-#### Vercel部署（推荐）
-
-1. Fork本项目到你的GitHub账户
-2. 在Vercel注册并导入你fork的项目
-3. 在Vercel项目设置中添加以下环境变量：
-   - `API_KEY`: 你的Gemini API密钥（必填）
-   - `API_URL`: 自定义API URL（可选）
-4. 点击部署，等待部署完成
-
-
-
-
-## 🤝 参与贡献
-
-欢迎所有形式的贡献！以下是参与本项目的几种方式：
-
-1. **提交问题**：报告bug或提出新功能建议
-2. **改进文档**：完善README或添加使用教程
-3. **提交代码**：通过Pull Request贡献代码
-4. **分享使用经验**：在Issues中分享你的使用技巧
+> 在提交 PR 之前请先创建 Issue 进行沟通，保持方向一致。
+---
 
 ## 📄 许可证
+本项目基于 **[MIT License](LICENSE)** 发布。© 2025 Japanese Analyzer
 
-MIT
+---
 
-## 📞 联系方式
-
-如有问题或建议，请通过GitHub Issues联系。
-
+## 📬 联系方式
+如有问题，请开一个 Issue 交流
