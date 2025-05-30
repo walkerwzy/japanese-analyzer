@@ -6,6 +6,7 @@ AI驱动的日语文章解析工具，帮助中文用户深入理解日语句子
 
 日本語文章解析器是一个面向中文用户的日语学习辅助工具，基于先进的AI技术，能够对日语句子进行深度解析，帮助用户理解日语语法结构、词性功能和详细词义。无论是初学者还是进阶学习者，都能从这个工具中获得有价值的学习帮助。
 
+[演示地址](https://japanese-analyzer-demo.vercel.app/)
 ## 🎬 演示
 
 https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
