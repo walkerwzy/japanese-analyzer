@@ -24,7 +24,11 @@
 立即在浏览器中试用 👉 **[Demo](https://japanese-analyzer-demo.vercel.app/)**
 
 或查看演示视频
-https://github.com/user-attachments/assets/6a6b9efa-6ff9-47cc-8d13-46b63d5718aa
+
+
+https://github.com/user-attachments/assets/5039cb62-135e-48e1-971d-960d6b82cacf
+
+
 ---
 
 ### 一键部署到 Vercel（推荐）
